@@ -74,3 +74,21 @@ func TakeNGenerator(done <-chan interface{}, inputStream <-chan interface{}, num
 
 	return takeStream
 }
+
+func RepeatFnGenerator(done <-chan interface{}, fn func() interface{}) <-chan interface{} {
+	stream := make(chan interface{})
+
+	go func() {
+		defer close(stream)
+		for {
+			//val := fn()
+			select {
+			case <-done:
+				return
+			case stream <- fn():
+			}
+		}
+	}()
+
+	return stream
+}
